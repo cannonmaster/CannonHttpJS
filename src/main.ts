@@ -2,8 +2,14 @@ let fetchImplementation: any;
 
 if (typeof window === "undefined") {
   // Running in Node.js
-  const { default: fetchNode } = await import("node-fetch");
-  fetchImplementation = fetchNode;
+  // const { default: fetchNode } = await import("node-fetch");
+
+  // mod.cjs
+  fetchImplementation = (...args: unknown[]): Promise<any> =>
+    import("node-fetch").then(({ default: fetch }) =>
+      fetch(...(args as Parameters<typeof fetch>))
+    );
+  // fetchImplementation = fetchNode;
 } else {
   // Running in the browser
   fetchImplementation = window.fetch.bind(window);
@@ -11,17 +17,17 @@ if (typeof window === "undefined") {
 
 type ResponseSanitizer<T> = (data: T) => T;
 type RequestInterceptor<T> = (
-  config: RequestOptions<T>
-) => RequestOptions<T> | Promise<RequestOptions<T>>;
+  config: ExtendedRequestOptions<T>
+) => ExtendedRequestOptions<T> | Promise<ExtendedRequestOptions<T>>;
 type ResponseInterceptor<T> = (
   response: ResponseData<T>
 ) => ResponseData<T> | Promise<ResponseData<T>>;
 
-interface RequestOptions<T> {
-  method?: string;
-  url: string;
+type ExtendedRequestOptions<T> = RequestOptions<T> & RequestInit;
+// @ts-ignore
+interface RequestOptions<T = any> {
+  url?: string | URL;
   params?: Record<string, string | number>;
-  headers?: Record<string, string>;
   data?: any;
   files?: File[] | undefined;
   isFormData?: boolean; // Flag to indicate if it's a form POST request
@@ -59,11 +65,24 @@ class CannonHttpJS<T = unknown> {
   }
 
   public setCacheTime(cacheTime: number): void {
+    if (cacheTime <= 0) return;
     this.defaultCacheTime = cacheTime;
   }
 
   public setBaseUrl(baseUrl: string): void {
     this.baseURL = baseUrl;
+  }
+
+  public clearRequestInterceptor(interceptor?: RequestInterceptor<T>) {
+    if (!interceptor) {
+      this.requestInterceptors = [];
+    }
+  }
+
+  public clearResoponseInterceptor(interceptor?: ResponseInterceptor<T>) {
+    if (!interceptor) {
+      this.responseInterceptors = [];
+    }
   }
 
   public addRequestInterceptor(interceptor: RequestInterceptor<T>): void {
@@ -79,6 +98,16 @@ class CannonHttpJS<T = unknown> {
     else this.cache.clear();
   }
 
+  private kindOf(type: string) {
+    const toString = Object.prototype.toString;
+
+    return function (value: any) {
+      return (
+        type.toLowerCase() === toString.call(value).slice(8, -1).toLowerCase()
+      );
+    };
+  }
+
   public getOldestEntry() {
     let oldestExpiration = Infinity;
     let oldestEntry;
@@ -92,7 +121,7 @@ class CannonHttpJS<T = unknown> {
   }
 
   private async executeRequest(
-    config: RequestOptions<T>,
+    config: ExtendedRequestOptions<T>,
     retryCount = 0
   ): Promise<ResponseData<T>> {
     // Apply request interceptors
@@ -106,50 +135,98 @@ class CannonHttpJS<T = unknown> {
 
     const {
       method = "GET",
-      url,
+      url = "",
       params = {},
-      headers = {},
+      body,
+      cache,
+      credentials,
+      headers,
+      integrity,
+      keepalive,
+      mode,
+      redirect,
+      referrer,
+      referrerPolicy,
+      signal,
+      window,
       data,
-      files,
       isFormData = false,
       timeout,
     } = config;
 
     const requestURL = new URL(url, this.baseURL);
+
     Object.keys(params).forEach((key) =>
       requestURL.searchParams.append(key, params[key].toString())
     );
 
-    const abortController = new AbortController();
-    const { signal } = abortController;
-
     const requestOptions: RequestInit = {
       method,
-      headers: this.applyDefaultHeaders(headers), // Apply default headers
-      body: undefined,
+      cache,
+      credentials,
+      integrity,
+      keepalive,
+      mode,
+      redirect,
+      referrer,
+      referrerPolicy,
+      window,
+      headers, // Apply default headers
+      body,
       signal,
     };
 
-    if (data) {
-      if (isFormData) {
-        const formData = new FormData();
+    const abortController = new AbortController();
+    if (!signal) {
+      requestOptions.signal = abortController.signal;
+    }
 
-        for (const key in data) {
-          if (data.hasOwnProperty(key)) {
-            const value = data[key];
-            if (value instanceof File) {
-              formData.append(key, value);
-            } else {
-              formData.append(key, JSON.stringify(value));
+    if (data) {
+      if (data instanceof FormData) {
+        requestOptions.body = data;
+      } else {
+        if (isFormData) {
+          const formData = new FormData();
+
+          for (const key in data) {
+            if (data.hasOwnProperty(key)) {
+              const value = data[key];
+              if (value instanceof File) {
+                formData.append("file", value);
+              } else if (value instanceof FileList) {
+                for (let i = 0; i < value.length; i++) {
+                  const file = value[i];
+                  formData.append("file", file, file.name);
+                }
+              } else {
+                formData.append(key, value);
+              }
             }
           }
+          requestOptions.body = formData;
         }
 
-        requestOptions.body = formData;
-      } else {
-        requestOptions.body = JSON.stringify(data);
+        if (!isFormData) {
+          this.setDefaultHeaders({
+            "Content-Type": "application/json; charset=utf-8",
+          });
+          if (this.kindOf("object")(data)) {
+            requestOptions.body = JSON.stringify(data);
+          }
+
+          if (this.kindOf("string")(data)) {
+            if (this.kindOf("object")(JSON.parse(data)))
+              requestOptions.body = data;
+
+            if (!this.kindOf("object")(JSON.parse(data)))
+              throw new Error("invalid data format");
+          }
+        }
       }
     }
+    requestOptions.headers = this.applyDefaultHeaders(
+      requestOptions.headers as Record<string, string>
+    );
 
     try {
       let response: Response;
@@ -194,39 +271,40 @@ class CannonHttpJS<T = unknown> {
       };
 
       // Apply response interceptors
+      console.log(123123123);
       for (const interceptor of this.responseInterceptors) {
         processedResponse = await interceptor(processedResponse);
       }
 
-      if (method === "GET") {
+      if (method === "GET" && this.cacheSize > 0) {
         const expiration = Date.now() + this.defaultCacheTime;
         this.cache.set(requestURL.href, {
           data: processedResponse,
           expiresAt: expiration,
         });
-      }
-
-      if (this.cache.size > this.cacheSize) {
-        const oldestEntry = this.getOldestEntry();
-        if (oldestEntry) this.cache.delete(oldestEntry);
+        if (this.cache.size > this.cacheSize) {
+          const oldestEntry = this.getOldestEntry();
+          if (oldestEntry) this.cache.delete(oldestEntry);
+        }
       }
 
       return processedResponse;
     } catch (error: any) {
-      if (signal && signal.aborted) {
-        throw new Error("Request was aborted");
-      }
       if (retryCount < this.maxRetry) {
         const retryDelay = this.calculateRetryDelay(retryCount);
         await this.delay(retryDelay);
-        this.executeRequest(config, retryCount + 1);
+        return this.executeRequest(config, retryCount + 1);
       }
-      throw new Error(`Request failed: ${error.message}`);
+      if (abortController) abortController.abort();
+
+      throw new Error(
+        `Request failed: ${error.message}, and the request was aborted`
+      );
     }
   }
 
   private async delay(retryDelay: number): Promise<void> {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       setTimeout(() => {
         resolve();
       }, retryDelay);
@@ -244,45 +322,25 @@ class CannonHttpJS<T = unknown> {
 
   public get(
     url: string,
-    config: RequestOptions<T> = {} as RequestOptions<T>
+    config: ExtendedRequestOptions<T> = {} as ExtendedRequestOptions<T>
   ): Promise<ResponseData<T>> {
     const dataFromCache = this.cache.get(new URL(url, this.baseURL).href);
+
     if (dataFromCache && dataFromCache.expiresAt > Date.now()) {
+      dataFromCache.expiresAt = Date.now() + this.defaultCacheTime;
       return Promise.resolve(dataFromCache.data);
     }
     return this.executeRequest({ ...config, url, method: "GET" });
   }
 
-  public post(
+  public async post(
     url: string,
-    data: any,
-    config: RequestOptions<T> = {} as RequestOptions<T>
+    config: ExtendedRequestOptions<T> = {} as ExtendedRequestOptions<T>
   ): Promise<ResponseData<T>> {
-    const { isFormData = false } = config;
-
-    if (isFormData) {
-      const formData = new FormData();
-
-      if (data) {
-        for (const key in data) {
-          if (data.hasOwnProperty(key)) {
-            const value = data[key];
-            if (value instanceof File) {
-              formData.append(key, value);
-            } else {
-              formData.append(key, JSON.stringify(value));
-            }
-          }
-        }
-      }
-      data = formData;
-    }
-    // Regular POST request
-    const response = this.executeRequest({
+    const response = await this.executeRequest({
       ...config,
       url,
       method: "POST",
-      data,
     });
     this.invalidateCache(url);
     return response;
@@ -293,7 +351,7 @@ class CannonHttpJS<T = unknown> {
   public put(
     url: string,
     data: any,
-    config: RequestOptions<T> = {} as RequestOptions<T>
+    config: ExtendedRequestOptions<T> = {} as ExtendedRequestOptions<T>
   ): Promise<ResponseData<T>> {
     return this.executeRequest({ ...config, url, method: "PUT", data });
   }
@@ -301,20 +359,20 @@ class CannonHttpJS<T = unknown> {
   public patch(
     url: string,
     data: any,
-    config: RequestOptions<T> = {} as RequestOptions<T>
+    config: ExtendedRequestOptions<T> = {} as ExtendedRequestOptions<T>
   ): Promise<ResponseData<T>> {
     return this.executeRequest({ ...config, url, method: "PATCH", data });
   }
 
   public delete(
     url: string,
-    config: RequestOptions<T> = {} as RequestOptions<T>
+    config: ExtendedRequestOptions<T> = {} as ExtendedRequestOptions<T>
   ): Promise<ResponseData<T>> {
     return this.executeRequest({ ...config, url, method: "DELETE" });
   }
 
   public setDefaultHeaders(headers: Record<string, string>): void {
-    this.defaultHeaders = headers;
+    this.defaultHeaders = { ...this.defaultHeaders, ...headers };
   }
 
   private applyDefaultHeaders(
@@ -341,5 +399,5 @@ class CannonHttpJS<T = unknown> {
     return sanitizedData;
   }
 }
-export type { ResponseData, RequestOptions };
-export default CannonHttpJS;
+export type { ResponseData, RequestOptions, ExtendedRequestOptions };
+export default new CannonHttpJS();

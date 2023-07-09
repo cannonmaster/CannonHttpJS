@@ -1,40 +1,70 @@
-Certainly! Here's a sample README file that lists the features and includes a welcome message:
-
-````
 # CannonHttpJS
 
-Welcome to CannonHttpJS! This is a powerful HTTP client library that provides various features to simplify making HTTP requests in both Node.js and browser environments.
+CannonHttpJS is a versatile HTTP client library that provides a simple and flexible interface for making HTTP requests in both Node.js and browser environments. It offers features such as request interceptors, response interceptors, caching, timeout handling, and more. With CannonHttpJS, you can easily handle RESTful APIs and communicate with servers to fetch and send data.
 
 ## Features
 
-- **HTTP Requests**: Perform GET, POST, PUT, PATCH, and DELETE requests easily.
-- **Request Interceptors**: Add request interceptors to modify the request configuration before it is sent.
-- **Response Interceptors**: Add response interceptors to process and modify the response data.
-- **Request Caching**: Cache GET requests to improve performance and reduce redundant API calls.
-- **Cache Invalidation**: Invalidate specific cached URLs or clear the entire cache.
-- **Request Retries**: Automatically retry failed requests with customizable retry strategies.
-- **Timeout Handling**: Set timeout duration for requests to handle network delays.
-- **Default Headers**: Set default headers to be included in every request.
-- **Response Sanitization**: Sanitize and validate the response data before processing.
+- **HTTP Methods**: Perform common HTTP methods like GET, POST, PUT, PATCH, and DELETE.
+- **Request Interceptors**: Intercept and modify the request configuration before sending the request.
+- **Response Interceptors**: Intercept and modify the response data after receiving the response.
+- **Caching**: Cache responses to improve performance and reduce redundant requests.
+- **Timeout Handling**: Set timeouts for requests to ensure they don't take too long.
+- **Base URL**: Define a base URL to simplify request URLs.
+- **Default Headers**: Set default headers that will be applied to all requests.
+- **Retry Mechanism**: Retry failed requests with configurable retry count and delay.
 
+## Installation
 
+To install CannonHttpJS, you can use npm or yarn:
+
+```bash
+npm install cannon-http-js
 ```
-Feel free to customize the content and links based on your project's specifics.
+
+or
+
+```bash
+yarn add cannon-http-js
 ```
-````
 
-# CannonHttpJS
+## Usage
 
-欢迎使用 CannonHttpJS！这是一个功能强大的 HTTP 客户端库，为在 Node.js 和浏览器环境中进行 HTTP 请求提供了各种功能。
+Here's a basic example of how to use CannonHttpJS:
 
-## 特点
+```javascript
+import http from "cannon-http-js";
 
-- **HTTP 请求**：轻松执行 GET、POST、PUT、PATCH 和 DELETE 请求。
-- **请求拦截器**：添加请求拦截器以在发送请求前修改请求配置。
-- **响应拦截器**：添加响应拦截器以处理和修改响应数据。
-- **请求缓存**：缓存 GET 请求，提高性能并减少重复的 API 调用。
-- **缓存失效**：失效特定的缓存 URL 或清空整个缓存。
-- **请求重试**：使用可自定义的重试策略自动重试失败的请求。
-- **超时处理**：设置请求的超时时间以处理网络延迟。
-- **默认请求头**：设置默认的请求头，在每个请求中包含。
-- **响应数据处理**：在处理之前对响应数据进行清理和验证。
+// Set base URL
+http.setBaseUrl("https://api.example.com");
+
+// Perform a GET request
+http
+  .get("/users")
+  .then((response) => {
+    console.log(response.data);
+  })
+  .catch((error) => {
+    console.error(error);
+  });
+
+// Perform a POST request
+const postData = { name: "John Doe", email: "john@example.com" };
+http
+  .post("/users", { data: postData })
+  .then((response) => {
+    console.log(response.data);
+  })
+  .catch((error) => {
+    console.error(error);
+  });
+```
+
+For more detailed usage examples and information on available methods and options, please refer to the [Documentation](link-to-documentation).
+
+## Contributions
+
+Contributions are welcome! If you have any suggestions, bug reports, or feature requests, please create an issue on the [GitHub repository](link-to-github-repo).
+
+## License
+
+CannonHttpJS is released under the [MIT License](link-to-license).
