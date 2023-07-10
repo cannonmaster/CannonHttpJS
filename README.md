@@ -1,5 +1,7 @@
 # CannonHttpJS
 
+[![License: MIT](https://img.shields.io/badge/license-MIT-green)](https://opensource.org/licenses/MIT)
+
 CannonHttpJS is a versatile HTTP client library that provides a simple and flexible interface for making HTTP requests in both Node.js and browser environments. It offers features such as request interceptors, response interceptors, caching, timeout handling, and more. With CannonHttpJS, you can easily handle RESTful APIs and communicate with servers to fetch and send data.
 
 ## Features
@@ -15,56 +17,12 @@ CannonHttpJS is a versatile HTTP client library that provides a simple and flexi
 
 ## Installation
 
-To install CannonHttpJS, you can use npm or yarn:
-
-```bash
-npm install cannon-http-js
-```
-
-or
-
-```bash
-yarn add cannon-http-js
-```
-
 ## Usage
-
-Here's a basic example of how to use CannonHttpJS:
-
-```javascript
-import http from "cannon-http-js";
-
-// Set base URL
-http.setBaseUrl("https://api.example.com");
-
-// Perform a GET request
-http
-  .get("/users")
-  .then((response) => {
-    console.log(response.data);
-  })
-  .catch((error) => {
-    console.error(error);
-  });
-
-// Perform a POST request
-const postData = { name: "John Doe", email: "john@example.com" };
-http
-  .post("/users", { data: postData })
-  .then((response) => {
-    console.log(response.data);
-  })
-  .catch((error) => {
-    console.error(error);
-  });
-```
-
-For more detailed usage examples and information on available methods and options, please refer to the [Documentation](link-to-documentation).
 
 ## Contributions
 
-Contributions are welcome! If you have any suggestions, bug reports, or feature requests, please create an issue on the [GitHub repository](link-to-github-repo).
+Contributions are welcome! If you have any suggestions, bug reports, or feature requests, please create an issue on the [GitHub repository](https://github.com/cannonmaster/CannonHttpJS).
 
 ## License
 
-CannonHttpJS is released under the [MIT License](link-to-license).
+CannonHttpJS is released under the [MIT License](https://opensource.org/licenses/MIT).

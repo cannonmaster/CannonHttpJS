@@ -2,13 +2,16 @@
 import { s } from "vitest/dist/types-198fd1d9";
 import CannonHttpJs, { RequestOptions, ResponseData } from "../src/main";
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-
+import CannonHttp from "@cannonui/httpjs";
 type RequestInterceptor<T> = (
   config: RequestOptions<T>
 ) => RequestOptions<T> | Promise<RequestOptions<T>>;
 
 describe("CannonHttpJS", () => {
   let httpClient = CannonHttpJs;
+
+  // production test
+  // let httpClient = CannonHttp;
 
   beforeEach(() => {
     // httpClient = new CannonHttpJs();

@@ -67,19 +67,20 @@ app.post("/endpoint", (req, res) => {
 });
 
 app.post("/form-data", (req, res) => {
-  // console.log(req.body);
+  console.log(req.body);
   res.status(StatusCodes.OK).send(req.headers["content-type"]);
 });
 
 app.post("/is-form-data", upload.none(), (req, res) => {
+  console.log(req.headers["content-type"]);
   res.status(StatusCodes.OK).send(req.headers["content-type"]);
 });
 
 app.post("/file", upload.single("file"), (req, res) => {
-  console.log(req.headers, "---------");
-  console.log(req.body);
-  console.log(req.data);
-  console.log(req.file, "abc");
+  // console.log(req.headers, "---------");
+  // console.log(req.body);
+  // console.log(req.data);
+  // console.log(req.file, "abc");
   res.status(StatusCodes.OK).send("abc");
 });
 

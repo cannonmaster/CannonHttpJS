@@ -1,5 +1,7 @@
 # CannonHttpJS
 
+[![License: MIT](https://img.shields.io/badge/license-MIT-green)](https://opensource.org/licenses/MIT)
+
 CannonHttpJS 是一个多功能的 HTTP 客户端库，为 Node.js 和浏览器环境提供了一个简单而灵活的接口，用于发起 HTTP 请求。它提供了请求拦截器、响应拦截器、缓存、超时处理等功能。使用 CannonHttpJS，您可以轻松处理 RESTful API，并与服务器进行数据的获取和发送。
 
 ## 功能特点
@@ -15,56 +17,12 @@ CannonHttpJS 是一个多功能的 HTTP 客户端库，为 Node.js 和浏览器�
 
 ## 安装
 
-您可以使用 npm 或 yarn 安装 CannonHttpJS：
-
-```bash
-npm install cannon-http-js
-```
-
-或
-
-```bash
-yarn add cannon-http-js
-```
-
 ## 使用示例
-
-以下是使用 CannonHttpJS 的基本示例：
-
-```javascript
-import http from "cannon-http-js";
-
-// 设置基础 URL
-http.setBaseUrl("https://api.example.com");
-
-// 发起 GET 请求
-http
-  .get("/users")
-  .then((response) => {
-    console.log(response.data);
-  })
-  .catch((error) => {
-    console.error(error);
-  });
-
-// 发起 POST 请求
-const postData = { name: "John Doe", email: "john@example.com" };
-http
-  .post("/users", { data: postData })
-  .then((response) => {
-    console.log(response.data);
-  })
-  .catch((error) => {
-    console.error(error);
-  });
-```
-
-更多详细的使用示例和可用方法、选项的信息，请参考[文档](链接到文档)。
 
 ## 贡献
 
-欢迎贡献！如果您有任何建议、错误报告或功能请求，请在[GitHub 仓库](链接到 GitHub 仓库)上创建一个 issue。
+欢迎贡献！如果您有任何建议、错误报告或功能请求，请在[GitHub 仓库](https://github.com/cannonmaster/CannonHttpJS)上创建一个 issue。
 
 ## 许可证
 
-CannonHttpJS 使用 [MIT 许可证](链接到许可证)发布。
+CannonHttpJS 使用 [MIT 许可证](https://opensource.org/licenses/MIT)发布。

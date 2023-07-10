@@ -5,13 +5,17 @@ import CannonHttpJs, {
 } from "../src/main";
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import nock, { RequestBodyMatcher } from "nock";
-
+// import CannonHttp from "@cannonui/httpjs";
+// const CannonHttp = require("@cannonui/httpjs");
 type RequestInterceptor<T> = (
   config: RequestOptions<T>
 ) => RequestOptions<T> | Promise<RequestOptions<T>>;
 
 describe("CannonHttpJS", () => {
   let httpClient = CannonHttpJs;
+
+  // production
+  // let httpClient = CannonHttp;
 
   beforeEach(() => {
     // httpClient = new CannonHttpJs();
