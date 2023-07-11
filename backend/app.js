@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import { StatusCodes } from "http-status-codes";
 import multer from "multer";
+// import httpjs from "@cannonui/httpjs";
 import morgan from "morgan";
 const storage = multer.memoryStorage();
 const upload = multer({ dest: "uploads/" });
@@ -12,6 +13,12 @@ app.use(
     extended: true,
   })
 );
+// app.get("/server", async (req, res) => {
+//   const ok = await httpjs.get("http://localhost:3000");
+//   console.log(ok);
+
+//   res.status(StatusCodes.OK).send("ok");
+// });
 // app.use(morgan("dev"));
 app.use(cors());
 app.get("/auth-token", (req, res) => {
@@ -72,7 +79,6 @@ app.post("/form-data", (req, res) => {
 });
 
 app.post("/is-form-data", upload.none(), (req, res) => {
-  console.log(req.headers["content-type"]);
   res.status(StatusCodes.OK).send(req.headers["content-type"]);
 });
 

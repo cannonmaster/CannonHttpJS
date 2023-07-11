@@ -1,7 +1,7 @@
 import path, { resolve } from "path";
 import { visualizer } from "rollup-plugin-visualizer";
 import { defineConfig } from "vite";
-// import dts from "vite-plugin-dts";
+import dts from "vite-plugin-dts";
 export default defineConfig((config) => ({
   publicDir: false,
   build: {
@@ -28,6 +28,7 @@ export default defineConfig((config) => ({
     outDir: "cannonHttpJS",
   },
   plugins: [
+    dts(),
     visualizer({
       open: true,
     }),

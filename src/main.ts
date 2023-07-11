@@ -1,10 +1,6 @@
 let fetchImplementation: any;
 
 if (typeof window === "undefined") {
-  // Running in Node.js
-  // const { default: fetchNode } = await import("node-fetch");
-  // fetchImplementation = fetchNode;
-
   // mod.cjs
   fetchImplementation = (...args: unknown[]): Promise<any> =>
     import("node-fetch").then(({ default: fetch }) =>
@@ -98,15 +94,29 @@ class CannonHttpJS<T = unknown> {
     else this.cache.clear();
   }
 
-  private kindOf(type: string) {
-    const toString = Object.prototype.toString;
-
-    return function (value: any) {
-      return (
-        type.toLowerCase() === toString.call(value).slice(8, -1).toLowerCase()
-      );
-    };
+  private kindOfObject(value: any) {
+    if (Array.isArray(value)) {
+      return false;
+    } else if (value === null) {
+      return false;
+    } else {
+      return typeof value === "object";
+    }
   }
+
+  private kindOfString(value: any) {
+    return typeof value === "string";
+  }
+
+  // private kindOf(type: string) {
+  //   const toString = Object.prototype.toString;
+
+  //   return function (value: any) {
+  //     return (
+  //       type.toLowerCase() === toString.call(value).slice(8, -1).toLowerCase()
+  //     );
+  //   };
+  // }
 
   public getOldestEntry() {
     let oldestExpiration = Infinity;
@@ -152,6 +162,7 @@ class CannonHttpJS<T = unknown> {
       data,
       isFormData = false,
       timeout,
+      ...rest
     } = config;
 
     const requestURL = new URL(url, this.baseURL);
@@ -210,15 +221,14 @@ class CannonHttpJS<T = unknown> {
           this.setDefaultHeaders({
             "Content-Type": "application/json; charset=utf-8",
           });
-          if (this.kindOf("object")(data)) {
+          if (this.kindOfObject(data)) {
             requestOptions.body = JSON.stringify(data);
           }
 
-          if (this.kindOf("string")(data)) {
-            if (this.kindOf("object")(JSON.parse(data)))
-              requestOptions.body = data;
+          if (this.kindOfString(data)) {
+            if (this.kindOfObject(JSON.parse(data))) requestOptions.body = data;
 
-            if (!this.kindOf("object")(JSON.parse(data)))
+            if (!this.kindOfObject(JSON.parse(data)))
               throw new Error("invalid data format");
           }
         }
@@ -271,7 +281,6 @@ class CannonHttpJS<T = unknown> {
       };
 
       // Apply response interceptors
-      console.log(123123123);
       for (const interceptor of this.responseInterceptors) {
         processedResponse = await interceptor(processedResponse);
       }
@@ -350,18 +359,16 @@ class CannonHttpJS<T = unknown> {
 
   public put(
     url: string,
-    data: any,
     config: ExtendedRequestOptions<T> = {} as ExtendedRequestOptions<T>
   ): Promise<ResponseData<T>> {
-    return this.executeRequest({ ...config, url, method: "PUT", data });
+    return this.executeRequest({ ...config, url, method: "PUT" });
   }
 
   public patch(
     url: string,
-    data: any,
     config: ExtendedRequestOptions<T> = {} as ExtendedRequestOptions<T>
   ): Promise<ResponseData<T>> {
-    return this.executeRequest({ ...config, url, method: "PATCH", data });
+    return this.executeRequest({ ...config, url, method: "PATCH" });
   }
 
   public delete(

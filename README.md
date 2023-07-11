@@ -1,28 +1,30 @@
-# CannonHttpJS
+<h1 align="center" style="border-bottom: 2px solid #ebebeb;">CannonHttpJS</h1>
+<div align="center" style="margin-bottom: 10px;">
+<img src="https://img.shields.io/badge/license-MIT-green" />
+<img src="https://img.shields.io/badge/test_coverage-98%25-cyan" />
+</div>
 
-[![License: MIT](https://img.shields.io/badge/license-MIT-green)](https://opensource.org/licenses/MIT)
+CannonHttpJS is a versatile HTTP client library that provides a simple and flexible interface for making HTTP requests in both Node.js and browser environments. It offers features such as request interceptors, response interceptors, caching, and timeout handling. With CannonHttpJS, you can easily handle RESTful APIs and communicate with servers for data retrieval and sending.
 
-CannonHttpJS is a versatile HTTP client library that provides a simple and flexible interface for making HTTP requests in both Node.js and browser environments. It offers features such as request interceptors, response interceptors, caching, timeout handling, and more. With CannonHttpJS, you can easily handle RESTful APIs and communicate with servers to fetch and send data.
-
-## Features
+<h2 style="border-bottom: 2px solid #ebebeb;"> Key Features</h2>
 
 - **HTTP Methods**: Perform common HTTP methods like GET, POST, PUT, PATCH, and DELETE.
-- **Request Interceptors**: Intercept and modify the request configuration before sending the request.
-- **Response Interceptors**: Intercept and modify the response data after receiving the response.
-- **Caching**: Cache responses to improve performance and reduce redundant requests.
-- **Timeout Handling**: Set timeouts for requests to ensure they don't take too long.
-- **Base URL**: Define a base URL to simplify request URLs.
-- **Default Headers**: Set default headers that will be applied to all requests.
-- **Retry Mechanism**: Retry failed requests with configurable retry count and delay.
+- **Request Interceptors**: Intercept and modify request configurations before sending.
+- **Response Interceptors**: Intercept and modify response data after receiving.
+- **Caching**: Cache responses to improve performance and reduce duplicate requests.
+- **Timeout Handling**: Set a timeout duration to ensure requests do not take too long.
+- **Base URL**: Define a base URL to simplify the setting of request URLs.
+- **Default Headers**: Set default headers to be applied to all requests.
+- **Retry Mechanism**: Configure the number of retries and delay time for failed requests.
 
-## Installation
+<h2 style="border-bottom: 2px solid #ebebeb;">Installation</h2>
 
-## Usage
+```bash
+npm install @cannonui/httpjs@latest
+```
 
-## Contributions
+You're now ready to start using CannonHttpJS in your projects. Enjoy the power and flexibility it offers for handling HTTP requests!
 
-Contributions are welcome! If you have any suggestions, bug reports, or feature requests, please create an issue on the [GitHub repository](https://github.com/cannonmaster/CannonHttpJS).
+<h2 style="border-bottom: 2px solid #ebebeb;">License</h2>
 
-## License
-
-CannonHttpJS is released under the [MIT License](https://opensource.org/licenses/MIT).
+CannonHttpJS is open-source software licensed under the [MIT License](https://opensource.org/licenses/MIT).

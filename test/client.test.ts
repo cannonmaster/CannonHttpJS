@@ -224,77 +224,77 @@ describe("CannonHttpJS", () => {
     expect(responseAfterInvalidation.data).toBe("get response");
   });
 
-  // it("should handle PATCH request", async () => {
-  //   // Make the PATCH request
-  //   const response = await httpClient.patch("http://localhost:3000/endpoint", {
-  //     key: "value",
-  //   });
+  it("should handle PATCH request", async () => {
+    // Make the PATCH request
+    const response = await httpClient.patch("http://localhost:3000/endpoint", {
+      key: "value",
+    });
 
-  //   // Assertions
-  //   expect(response.status).toBe(200);
-  //   expect(response.data).toBe("patch response");
-  // });
-  // it("should handle request timeout", async () => {
-  //   // Set the base URL
-  //   httpClient.setBaseUrl("http://localhost:3000");
+    // Assertions
+    expect(response.status).toBe(200);
+    expect(response.data).toBe("patch response");
+  });
+  it("should handle request timeout", async () => {
+    // Set the base URL
+    httpClient.setBaseUrl("http://localhost:3000");
 
-  //   // Make the GET request with a timeout of 500 milliseconds
-  //   const timeout = 500;
-  //   const requestOptions = { url: "/delay", timeout }; // Include the `url` and `timeout` properties in RequestOptions
+    // Make the GET request with a timeout of 500 milliseconds
+    const timeout = 500;
+    const requestOptions = { url: "/delay", timeout }; // Include the `url` and `timeout` properties in RequestOptions
 
-  //   // Ensure the request throws an error due to timeout
-  //   await expect(() =>
-  //     httpClient.get("/delay", requestOptions)
-  //   ).rejects.toThrowError(/Request timed out after \d+ms/);
-  // });
+    // Ensure the request throws an error due to timeout
+    await expect(() =>
+      httpClient.get("/delay", requestOptions)
+    ).rejects.toThrowError(/Request timed out after \d+ms/);
+  });
 
-  // it("should handle request timeout with success", async () => {
-  //   // Set the base URL
-  //   httpClient.setBaseUrl("http://localhost:3000");
+  it("should handle request timeout with success", async () => {
+    // Set the base URL
+    httpClient.setBaseUrl("http://localhost:3000");
 
-  //   // Make the GET request with a timeout of 500 milliseconds
-  //   const timeout = 3000;
-  //   const requestOptions = { url: "/delay", timeout }; // Include the `url` and `timeout` properties in RequestOptions
+    // Make the GET request with a timeout of 500 milliseconds
+    const timeout = 3000;
+    const requestOptions = { url: "/delay", timeout }; // Include the `url` and `timeout` properties in RequestOptions
 
-  //   // Ensure the request throws an error due to timeout
-  //   const res = await httpClient.get("/delay", requestOptions);
-  //   expect(res.status).toBe(200);
-  //   expect(res.data).toBe("timeout working");
-  // });
+    // Ensure the request throws an error due to timeout
+    const res = await httpClient.get("/delay", requestOptions);
+    expect(res.status).toBe(200);
+    expect(res.data).toBe("timeout working");
+  });
 
-  // it("should append query parameters to the URL", async () => {
-  //   // Set the base URL
-  //   httpClient.setBaseUrl("http://localhost:3000");
+  it("should append query parameters to the URL", async () => {
+    // Set the base URL
+    httpClient.setBaseUrl("http://localhost:3000");
 
-  //   // Make the GET request with query parameters
-  //   const response = await httpClient.get("/param", {
-  //     params: { key1: "value1", key2: "value2" },
-  //   });
+    // Make the GET request with query parameters
+    const response = await httpClient.get("/param", {
+      params: { key1: "value1", key2: "value2" },
+    });
 
-  //   // Assertions
-  //   expect(response.status).toBe(200);
-  //   expect(response.data).toBe("/param?key1=value1&key2=value2");
-  // });
+    // Assertions
+    expect(response.status).toBe(200);
+    expect(response.data).toBe("/param?key1=value1&key2=value2");
+  });
 
-  // it("should handle PUT request", async () => {
-  //   // Make the PUT request
-  //   const response = await httpClient.put("http://localhost:3000/endpoint", {
-  //     key: "value",
-  //   });
+  it("should handle PUT request", async () => {
+    // Make the PUT request
+    const response = await httpClient.put("http://localhost:3000/endpoint", {
+      key: "value",
+    });
 
-  //   // Assertions
-  //   expect(response.status).toBe(200);
-  //   expect(response.data).toBe("put response");
-  // });
+    // Assertions
+    expect(response.status).toBe(200);
+    expect(response.data).toBe("put response");
+  });
 
-  // it("should handle DELETE request", async () => {
-  //   // Make the DELETE request
-  //   const response = await httpClient.delete("http://localhost:3000/endpoint");
+  it("should handle DELETE request", async () => {
+    // Make the DELETE request
+    const response = await httpClient.delete("http://localhost:3000/endpoint");
 
-  //   // Assertions
-  //   expect(response.status).toBe(200);
-  //   expect(response.data).toBe("delete response");
-  // });
+    // Assertions
+    expect(response.status).toBe(200);
+    expect(response.data).toBe("delete response");
+  });
 
   it("should handle response interceptors", async () => {
     // Add a response interceptor

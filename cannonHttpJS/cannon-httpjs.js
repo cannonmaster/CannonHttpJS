@@ -1,10 +1,10 @@
 var H = Object.defineProperty;
 var j = (h, e, t) => e in h ? H(h, e, { enumerable: !0, configurable: !0, writable: !0, value: t }) : h[e] = t;
 var n = (h, e, t) => (j(h, typeof e != "symbol" ? e + "" : e, t), t);
-let y;
-typeof window > "u" ? y = (...h) => import("./index-21ef303e.js").then(
+let m;
+typeof window > "u" ? m = (...h) => import("./index-21ef303e.js").then(
   ({ default: e }) => e(...h)
-) : y = window.fetch.bind(window);
+) : m = window.fetch.bind(window);
 class k {
   constructor() {
     n(this, "baseURL");
@@ -45,16 +45,24 @@ class k {
   invalidateCache(e) {
     e ? this.cache.delete(new URL(e, this.baseURL).href) : this.cache.clear();
   }
-  kindOf(e) {
-    const t = Object.prototype.toString;
-    return function(a) {
-      return e.toLowerCase() === t.call(a).slice(8, -1).toLowerCase();
-    };
+  kindOfObject(e) {
+    return Array.isArray(e) || e === null ? !1 : typeof e == "object";
   }
+  kindOfString(e) {
+    return typeof e == "string";
+  }
+  // private kindOf(type: string) {
+  //   const toString = Object.prototype.toString;
+  //   return function (value: any) {
+  //     return (
+  //       type.toLowerCase() === toString.call(value).slice(8, -1).toLowerCase()
+  //     );
+  //   };
+  // }
   getOldestEntry() {
     let e = 1 / 0, t;
-    for (const [a, p] of this.cache)
-      p.expiresAt < e && (e = p.expiresAt, t = a);
+    for (const [r, p] of this.cache)
+      p.expiresAt < e && (e = p.expiresAt, t = r);
     return t;
   }
   async executeRequest(e, t = 0) {
@@ -65,22 +73,22 @@ class k {
         throw new Error(`Request interceptor failed: ${i.message}`);
       }
     const {
-      method: a = "GET",
+      method: r = "GET",
       url: p = "",
       params: b = {},
       body: q,
-      cache: E,
-      credentials: S,
-      headers: T,
-      integrity: g,
+      cache: O,
+      credentials: E,
+      headers: S,
+      integrity: T,
       keepalive: z,
-      mode: O,
-      redirect: C,
-      referrer: I,
+      mode: g,
+      redirect: I,
+      referrer: C,
       referrerPolicy: L,
       signal: D,
       window: P,
-      data: r,
+      data: a,
       isFormData: x = !1,
       timeout: R
     } = e, u = new URL(p, this.baseURL);
@@ -88,35 +96,35 @@ class k {
       (s) => u.searchParams.append(s, b[s].toString())
     );
     const o = {
-      method: a,
-      cache: E,
-      credentials: S,
-      integrity: g,
+      method: r,
+      cache: O,
+      credentials: E,
+      integrity: T,
       keepalive: z,
-      mode: O,
-      redirect: C,
-      referrer: I,
+      mode: g,
+      redirect: I,
+      referrer: C,
       referrerPolicy: L,
       window: P,
-      headers: T,
+      headers: S,
       // Apply default headers
       body: q,
       signal: D
     }, w = new AbortController();
-    if (D || (o.signal = w.signal), r)
-      if (r instanceof FormData)
-        o.body = r;
+    if (D || (o.signal = w.signal), a)
+      if (a instanceof FormData)
+        o.body = a;
       else {
         if (x) {
           const s = new FormData();
-          for (const i in r)
-            if (r.hasOwnProperty(i)) {
-              const c = r[i];
+          for (const i in a)
+            if (a.hasOwnProperty(i)) {
+              const c = a[i];
               if (c instanceof File)
                 s.append("file", c);
               else if (c instanceof FileList)
-                for (let l = 0; l < c.length; l++) {
-                  const d = c[l];
+                for (let f = 0; f < c.length; f++) {
+                  const d = c[f];
                   s.append("file", d, d.name);
                 }
               else
@@ -126,7 +134,7 @@ class k {
         }
         if (!x && (this.setDefaultHeaders({
           "Content-Type": "application/json; charset=utf-8"
-        }), this.kindOf("object")(r) && (o.body = JSON.stringify(r)), this.kindOf("string")(r) && (this.kindOf("object")(JSON.parse(r)) && (o.body = r), !this.kindOf("object")(JSON.parse(r)))))
+        }), this.kindOfObject(a) && (o.body = JSON.stringify(a)), this.kindOfString(a) && (this.kindOfObject(JSON.parse(a)) && (o.body = a), !this.kindOfObject(JSON.parse(a)))))
           throw new Error("invalid data format");
       }
     o.headers = this.applyDefaultHeaders(
@@ -135,40 +143,39 @@ class k {
     try {
       let s;
       if (R) {
-        const f = new Promise((v, U) => {
+        const l = new Promise((A, U) => {
           setTimeout(() => {
             w.abort(), U(new Error(`Request timed out after ${R}ms`));
           }, R);
-        }), m = y(
+        }), y = m(
           u.href,
           o
         );
-        s = await Promise.race([f, m]);
+        s = await Promise.race([l, y]);
       } else
-        s = await y(u.href, o);
+        s = await m(u.href, o);
       if (!s.ok)
         throw new Error(`Request failed with status ${s.status}`);
       let i;
       const c = s.headers.get("content-type");
       c && c.includes("application/json") ? i = await s.json() : i = await s.text();
-      const l = this.sanitizeResponseData(i);
+      const f = this.sanitizeResponseData(i);
       let d = {
         status: s.status,
         statusText: s.statusText,
         headers: s.headers,
-        data: l
+        data: f
       };
-      console.log(123123123);
-      for (const f of this.responseInterceptors)
-        d = await f(d);
-      if (a === "GET" && this.cacheSize > 0) {
-        const f = Date.now() + this.defaultCacheTime;
+      for (const l of this.responseInterceptors)
+        d = await l(d);
+      if (r === "GET" && this.cacheSize > 0) {
+        const l = Date.now() + this.defaultCacheTime;
         if (this.cache.set(u.href, {
           data: d,
-          expiresAt: f
+          expiresAt: l
         }), this.cache.size > this.cacheSize) {
-          const m = this.getOldestEntry();
-          m && this.cache.delete(m);
+          const y = this.getOldestEntry();
+          y && this.cache.delete(y);
         }
       }
       return d;
@@ -196,23 +203,23 @@ class k {
   //   return this.executeRequest(config);
   // }
   get(e, t = {}) {
-    const a = this.cache.get(new URL(e, this.baseURL).href);
-    return a && a.expiresAt > Date.now() ? (a.expiresAt = Date.now() + this.defaultCacheTime, Promise.resolve(a.data)) : this.executeRequest({ ...t, url: e, method: "GET" });
+    const r = this.cache.get(new URL(e, this.baseURL).href);
+    return r && r.expiresAt > Date.now() ? (r.expiresAt = Date.now() + this.defaultCacheTime, Promise.resolve(r.data)) : this.executeRequest({ ...t, url: e, method: "GET" });
   }
   async post(e, t = {}) {
-    const a = await this.executeRequest({
+    const r = await this.executeRequest({
       ...t,
       url: e,
       method: "POST"
     });
-    return this.invalidateCache(e), a;
+    return this.invalidateCache(e), r;
   }
   // Add other HTTP methods (e.g., put, patch, delete) as needed
-  put(e, t, a = {}) {
-    return this.executeRequest({ ...a, url: e, method: "PUT", data: t });
+  put(e, t, r = {}) {
+    return this.executeRequest({ ...r, url: e, method: "PUT", data: t });
   }
-  patch(e, t, a = {}) {
-    return this.executeRequest({ ...a, url: e, method: "PATCH", data: t });
+  patch(e, t, r = {}) {
+    return this.executeRequest({ ...r, url: e, method: "PATCH", data: t });
   }
   delete(e, t = {}) {
     return this.executeRequest({ ...t, url: e, method: "DELETE" });
@@ -228,12 +235,12 @@ class k {
   }
   sanitizeResponseData(e) {
     let t = e;
-    for (const a of this.responseSanitizers)
-      t = a(t);
+    for (const r of this.responseSanitizers)
+      t = r(t);
     return t;
   }
 }
-const F = new k();
+const v = new k();
 export {
-  F as default
+  v as default
 };

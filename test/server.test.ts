@@ -5,7 +5,7 @@ import CannonHttpJs, {
 } from "../src/main";
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import nock, { RequestBodyMatcher } from "nock";
-// import CannonHttp from "@cannonui/httpjs";
+import CannonHttp from "@cannonui/httpjs";
 // const CannonHttp = require("@cannonui/httpjs");
 type RequestInterceptor<T> = (
   config: RequestOptions<T>
@@ -216,7 +216,7 @@ describe("CannonHttpJS", () => {
     // Make the PATCH request
     const response = await httpClient.patch(
       "https://api.example.com/endpoint",
-      { key: "value" }
+      { data: { key: "value" } }
     );
 
     // Assertions
@@ -279,7 +279,7 @@ describe("CannonHttpJS", () => {
 
     // Make the PUT request
     const response = await httpClient.put("https://api.example.com/endpoint", {
-      key: "value",
+      data: { key: "value" },
     });
 
     // Assertions

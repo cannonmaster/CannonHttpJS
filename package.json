@@ -1,11 +1,12 @@
 {
   "name": "@cannonui/httpjs",
   "private": false,
-  "version": "1.0.9",
+  "version": "1.0.32",
   "type": "module",
   "files": [
     "cannonHttpJS"
   ],
+  "types": "./cannonHttpJS/main.d.ts",
   "main": "./cannonHttpJS/cannon-httpjs.umd.cjs",
   "module": "./cannonHttpJS/cannon-httpjs.js",
   "exports": {
@@ -37,10 +38,11 @@
     "rollup-plugin-visualizer": "^5.9.2",
     "typescript": "^5.0.2",
     "vite": "^4.4.0",
+    "vite-plugin-dts": "^3.2.0",
     "vitest": "^0.33.0"
   },
   "dependencies": {
-    "@cannonui/httpjs": "^1.0.9",
+    "@cannonui/httpjs": "^1.0.32",
     "axios": "^1.4.0",
     "cors": "^2.8.5",
     "express": "^4.18.2",
