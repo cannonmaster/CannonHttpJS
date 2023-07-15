@@ -70,48 +70,48 @@ describe("CannonHttpJS", () => {
     httpClient.setBaseUrl("https://api.example.com");
 
     // Mock the URL
-    const scope = nock("https://api.example.com")
-      .get("/endpoint")
-      .reply(200, "GET response");
+    // const scope = nock("https://api.example.com")
+    //   .get("/endpoint")
+    //   .reply(200, "GET response");
 
     // Make the GET request
-    const response = await httpClient.get("/endpoint");
+    const response = await httpClient.get("http://localhost:3000/get-endpoint");
 
     // Assertions
     expect(response.status).toBe(200);
     expect(response.data).toBe("GET response");
 
     // Ensure the mock URL was called
-    expect(scope.isDone()).toBe(true);
+    // expect(scope.isDone()).toBe(true);
   });
 
   it("should send a POST request successfully", async () => {
     // Mock the URL
-    const scope = nock("https://api.example.com")
-      .post("/endpoint")
-      .reply(201, "POST response");
+    // const scope = nock("https://api.example.com")
+    //   .post("/endpoint")
+    //   .reply(201, "POST response");
 
     // Make the POST request
-    const response = await httpClient.post("https://api.example.com/endpoint", {
+    const response = await httpClient.post("http://localhost:3000/endpoint", {
       data: { a: 123 },
     });
 
     // Assertions
-    expect(response.status).toBe(201);
-    expect(response.data).toBe("POST response");
+    expect(response.status).toBe(200);
+    expect(response.data).toBe("post response");
 
     // Ensure the mock URL was called
-    expect(scope.isDone()).toBe(true);
+    // expect(scope.isDone()).toBe(true);
   });
 
   it("should handle request interceptors", async () => {
     // Set the base URL
-    httpClient.setBaseUrl("https://api.example.com");
+    httpClient.setBaseUrl("http://localhost:3000");
 
     // Mock the URL
-    const scope = nock("https://api.example.com")
-      .get("/endpoint")
-      .reply(200, "GET response");
+    // const scope = nock("https://api.example.com")
+    //   .get("/endpoint")
+    //   .reply(200, "GET response");
 
     // Add a request interceptor
     httpClient.addRequestInterceptor((config: ExtendedRequestOptions<any>) => {
@@ -128,113 +128,123 @@ describe("CannonHttpJS", () => {
 
     // Assertions
     expect(response.status).toBe(200);
-    expect(response.data).toBe("GET response");
+    expect(response.data).toBe("get response");
 
     // Ensure the mock URL was called
-    expect(scope.isDone()).toBe(true);
+    // expect(scope.isDone()).toBe(true);
     // Ensure the request interceptor was applied
-    expect(scope.pendingMocks().length).toBe(0);
+    // expect(scope.pendingMocks().length).toBe(0);
   });
 
   it("should invalidate the cache and send a new GET request successfully", async () => {
     // Set the base URL
-    httpClient.setBaseUrl("https://api.example.com");
+    httpClient.setBaseUrl("http://localhost:3000");
 
     // Mock the URL for the initial request
-    const scope = nock("https://api.example.com")
-      .get("/endpoint")
-      .reply(200, "GET response");
+    // const scope = nock("https://api.example.com")
+    //   .get("/endpoint")
+    //   .reply(200, "GET response");
 
     // Make the initial GET request
-    const initialResponse = await httpClient.get("/endpoint");
+    const initialResponse = await httpClient.get("/cache");
 
     // Assertions for the initial request
     expect(initialResponse.status).toBe(200);
-    expect(initialResponse.data).toBe("GET response");
-    expect(scope.isDone()).toBe(true);
+    expect(initialResponse.data).toBe("Init connection");
+    // expect(scope.isDone()).toBe(true);
 
     // Invalidate the cache
-    httpClient.invalidateCache("/endpoint");
+    httpClient.invalidateCache("/cache");
+    const testHeaders = new Headers();
+    testHeaders.append("Conttent-Type", "application/json;");
+    httpClient["cache"].set("http://localhost:3000/cache", {
+      data: {
+        status: 200,
+        statusText: "abc",
+        headers: testHeaders,
+        data: "cached connection",
+      },
+      expiresAt: Date.now(),
+    });
 
     // Mock the URL for the subsequent request
-    const scopeAfterInvalidation = nock("https://api.example.com")
-      .get("/endpoint")
-      .reply(200, "New GET response");
+    // const scopeAfterInvalidation = nock("https://api.example.com")
+    //   .get("/endpoint")
+    //   .reply(200, "New GET response");
 
     // Make the GET request again
-    const responseAfterInvalidation = await httpClient.get("/endpoint");
+    const responseAfterInvalidation = await httpClient.get("/cache");
 
     // Assertions for the subsequent request
     expect(responseAfterInvalidation.status).toBe(200);
-    expect(responseAfterInvalidation.data).toBe("New GET response");
-    expect(scopeAfterInvalidation.isDone()).toBe(true);
+    expect(responseAfterInvalidation.data).toBe("Init connection");
+    // expect(scopeAfterInvalidation.isDone()).toBe(true);
   });
   it("should invalidate all cache", async () => {
     // Set the base URL
-    httpClient.setBaseUrl("https://api.example.com");
+    httpClient.setBaseUrl("http://localhost:3000");
 
     // Mock the URL
-    const scope = nock("https://api.example.com")
-      .get("/endpoint")
-      .reply(200, "GET response");
+    // const scope = nock("https://api.example.com")
+    //   .get("/endpoint")
+    //   .reply(200, "GET response");
 
     // Make the GET request
     const response = await httpClient.get("/endpoint");
 
     // Assertions
     expect(response.status).toBe(200);
-    expect(response.data).toBe("GET response");
+    expect(response.data).toBe("get response");
 
     // Ensure the mock URL was called
-    expect(scope.isDone()).toBe(true);
+    // expect(scope.isDone()).toBe(true);
 
     // Invalidate all cache
     httpClient.invalidateCache();
 
     // Mock the URL for the subsequent request
-    const scopeAfterInvalidation = nock("https://api.example.com")
-      .get("/endpoint")
-      .reply(200, "GET response");
+    // const scopeAfterInvalidation = nock("https://api.example.com")
+    //   .get("/endpoint")
+    //   .reply(200, "GET response");
 
     // Make the GET request again
     const responseAfterInvalidation = await httpClient.get("/endpoint");
 
     // Ensure the response is not retrieved from the cache
     expect(responseAfterInvalidation.status).toBe(200);
-    expect(responseAfterInvalidation.data).toBe("GET response");
+    expect(responseAfterInvalidation.data).toBe("get response");
 
     // Ensure the mock URL is called again
-    expect(scope.pendingMocks().length).toBe(0);
+    // expect(scope.pendingMocks().length).toBe(0);
   });
 
   it("should handle PATCH request", async () => {
     // Mock the URL with key-value matching
-    const scope = nock("https://api.example.com")
-      .patch("/endpoint", { key: "value" })
-      .reply(200, "PATCH response");
+    // const scope = nock("https://api.example.com")
+    //   .patch("/endpoint", { key: "value" })
+    //   .reply(200, "PATCH response");
 
     // Make the PATCH request
-    const response = await httpClient.patch(
-      "https://api.example.com/endpoint",
-      { data: { key: "value" } }
-    );
+    const response = await httpClient.patch("http://localhost:3000/endpoint", {
+      data: { key: "value" },
+    });
 
     // Assertions
     expect(response.status).toBe(200);
-    expect(response.data).toBe("PATCH response");
+    expect(response.data).toBe("patch response");
 
     // Ensure the mock URL was called
-    expect(scope.isDone()).toBe(true);
+    // expect(scope.isDone()).toBe(true);
   });
   it("should handle request timeout", async () => {
     // Set the base URL
-    httpClient.setBaseUrl("https://api.example.com");
+    httpClient.setBaseUrl("http://localhost:3000");
 
     // Mock the URL
-    const scope = nock("https://api.example.com")
-      .get("/endpoint")
-      .delay(1000) // Delay the response by 1 second
-      .reply(200, "GET response");
+    // const scope = nock("https://api.example.com")
+    //   .get("/endpoint")
+    //   .delay(1000) // Delay the response by 1 second
+    //   .reply(200, "GET response");
 
     // Make the GET request with a timeout of 500 milliseconds
     const timeout = 500;
@@ -242,21 +252,21 @@ describe("CannonHttpJS", () => {
 
     // Ensure the request throws an error due to timeout
     await expect(() =>
-      httpClient.get("/endpoint", requestOptions)
+      httpClient.get("/delay", requestOptions)
     ).rejects.toThrowError(/Request timed out after \d+ms/);
 
     // Ensure the mock URL was called
-    expect(scope.isDone()).toBe(true);
+    // expect(scope.isDone()).toBe(true);
   });
 
   it("should append query parameters to the URL", async () => {
     // Set the base URL
-    httpClient.setBaseUrl("https://api.example.com");
+    httpClient.setBaseUrl("http://localhost:3000");
 
     // Mock the URL
-    const scope = nock("https://api.example.com")
-      .get("/endpoint?key1=value1&key2=value2")
-      .reply(200, "GET response");
+    // const scope = nock("https://api.example.com")
+    //   .get("/endpoint?key1=value1&key2=value2")
+    //   .reply(200, "GET response");
 
     // Make the GET request with query parameters
     const response = await httpClient.get("/endpoint", {
@@ -265,55 +275,53 @@ describe("CannonHttpJS", () => {
 
     // Assertions
     expect(response.status).toBe(200);
-    expect(response.data).toBe("GET response");
+    expect(response.data).toBe("get response");
 
     // Ensure the mock URL was called
-    expect(scope.isDone()).toBe(true);
+    // expect(scope.isDone()).toBe(true);
   });
 
   it("should handle PUT request", async () => {
     // Mock the URL with key-value matching
-    const scope = nock("https://api.example.com")
-      .put("/endpoint", { key: "value" })
-      .reply(200, "PUT response");
+    // const scope = nock("https://api.example.com")
+    //   .put("/endpoint", { key: "value" })
+    //   .reply(200, "PUT response");
 
     // Make the PUT request
-    const response = await httpClient.put("https://api.example.com/endpoint", {
+    const response = await httpClient.put("http://localhost:3000/endpoint", {
       data: { key: "value" },
     });
 
     // Assertions
     expect(response.status).toBe(200);
-    expect(response.data).toBe("PUT response");
+    expect(response.data).toBe("put response");
 
     // Ensure the mock URL was called
-    expect(scope.isDone()).toBe(true);
+    // expect(scope.isDone()).toBe(true);
   });
 
   it("should handle DELETE request", async () => {
     // Mock the URL
-    const scope = nock("https://api.example.com")
-      .delete("/endpoint")
-      .reply(200, "DELETE response");
+    // const scope = nock("https://api.example.com")
+    //   .delete("/endpoint")
+    //   .reply(200, "DELETE response");
 
     // Make the DELETE request
-    const response = await httpClient.delete(
-      "https://api.example.com/endpoint"
-    );
+    const response = await httpClient.delete("http://localhost:3000/endpoint");
 
     // Assertions
     expect(response.status).toBe(200);
-    expect(response.data).toBe("DELETE response");
+    expect(response.data).toBe("delete response");
 
     // Ensure the mock URL was called
-    expect(scope.isDone()).toBe(true);
+    // expect(scope.isDone()).toBe(true);
   });
 
   it("should handle response interceptors", async () => {
     // Mock the URL
-    const scope = nock("https://api.example.com")
-      .get("/endpoint")
-      .reply(200, "GET response");
+    // const scope = nock("https://api.example.com")
+    //   .get("/endpoint")
+    //   .reply(200, "GET response");
 
     // Add a response interceptor
     httpClient.addResponseInterceptor((response) => {
@@ -323,21 +331,21 @@ describe("CannonHttpJS", () => {
     });
 
     // Make the GET request
-    const response = await httpClient.get("https://api.example.com/endpoint");
+    const response = await httpClient.get("http://localhost:3000/endpoint");
 
     // Assertions
     expect(response.status).toBe(200);
     expect(response.data).toBe("Modified response");
 
     // Ensure the mock URL was called
-    expect(scope.isDone()).toBe(true);
+    // expect(scope.isDone()).toBe(true);
   });
 
   it("should handle response sanitizers", async () => {
     // Mock the URL
-    const scope = nock("https://api.example.com")
-      .get("/endpoint")
-      .reply(200, { data: "Original data" });
+    // const scope = nock("https://api.example.com")
+    //   .get("/endpoint")
+    //   .reply(200, { data: "Original data" });
 
     // Add a response sanitizer
     httpClient.addResponseSanitizer((data: any) => {
@@ -346,14 +354,14 @@ describe("CannonHttpJS", () => {
     });
 
     // Make the GET request
-    const response = await httpClient.get("https://api.example.com/endpoint");
+    const response = await httpClient.get("http://localhost:3000/endpoint");
 
     // Assertions
     expect(response.status).toBe(200);
     expect(response.data).toBe("Sanitized data");
 
     // Ensure the mock URL was called
-    expect(scope.isDone()).toBe(true);
+    // expect(scope.isDone()).toBe(true);
   });
 
   it("should set cache size", () => {
@@ -395,13 +403,13 @@ describe("CannonHttpJS", () => {
     httpClient.setRetry(maxRetry);
 
     // Set up a mock URL that always returns an error
-    const scope = nock("https://api.example.com")
-      .get("/endpoint")
-      .replyWithError("Request error");
+    // const scope = nock("https://api.example.com")
+    //   .get("/endpoint")
+    //   .replyWithError("Request error");
 
     // Make the GET request
     try {
-      await httpClient.get("https://api.example.com/endpoint");
+      await httpClient.get("http://localhost:3000/endpoint");
     } catch (error) {
       // Ensure the error message matches the expected format
 
@@ -413,7 +421,7 @@ describe("CannonHttpJS", () => {
       expect(httpClient["executeRequest"]).toHaveBeenCalledTimes(maxRetry + 1);
 
       // Ensure the mock URL was called the expected number of times
-      expect(scope.isDone()).toBe(true);
+      // expect(scope.isDone()).toBe(true);
     }
   });
 

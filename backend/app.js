@@ -7,6 +7,7 @@ import morgan from "morgan";
 const storage = multer.memoryStorage();
 const upload = multer({ dest: "uploads/" });
 const app = express();
+let cache = false;
 app.use(express.json());
 app.use(
   express.urlencoded({
@@ -74,7 +75,7 @@ app.post("/endpoint", (req, res) => {
 });
 
 app.post("/form-data", (req, res) => {
-  console.log(req.body);
+  // console.log(req.body);
   res.status(StatusCodes.OK).send(req.headers["content-type"]);
 });
 

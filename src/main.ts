@@ -1,15 +1,17 @@
-let fetchImplementation: any;
+// let fetchImplementation: any;
 
-if (typeof window === "undefined") {
-  // mod.cjs
-  fetchImplementation = (...args: unknown[]): Promise<any> =>
-    import("node-fetch").then(({ default: fetch }) =>
-      fetch(...(args as Parameters<typeof fetch>))
-    );
-} else {
-  // Running in the browser
-  fetchImplementation = window.fetch.bind(window);
-}
+// if (typeof window === "undefined") {
+//   // mod.cjs
+//   fetchImplementation = (...args: unknown[]): Promise<any> =>
+//     import("node-fetch").then(({ default: fetch }) =>
+//       fetch(...(args as Parameters<typeof fetch>))
+//     );
+// } else {
+//   // Running in the browser
+//   fetchImplementation = window.fetch.bind(window);
+// }
+
+const fetchImplementation = fetch;
 
 type ResponseSanitizer<T> = (data: T) => T;
 type RequestInterceptor<T> = (
@@ -142,7 +144,6 @@ class CannonHttpJS<T = unknown> {
         throw new Error(`Request interceptor failed: ${error.message}`);
       }
     }
-
     const {
       method = "GET",
       url = "",
@@ -162,6 +163,7 @@ class CannonHttpJS<T = unknown> {
       data,
       isFormData = false,
       timeout,
+      //@ts-ignore
       ...rest
     } = config;
 
