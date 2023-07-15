@@ -14,8 +14,11 @@ jobs:
           node-version: 18
       - name: Install requirements
         run: npm install
-      - name: Init backend
-        run: cd backend && node app.js
+      - name: Start backend
+        run: |
+          cd backend
+          node app.js &
+          sleep 10  # Wait for the backend to initialize
       - name: Run tests and collect coverage
         run: npm run test
       - name: Upload coverage reports to Codecov
