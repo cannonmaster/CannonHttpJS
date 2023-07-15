@@ -8,10 +8,10 @@ type RequestInterceptor<T> = (
 ) => RequestOptions<T> | Promise<RequestOptions<T>>;
 
 describe("CannonHttpJS", () => {
-  // let httpClient = CannonHttpJs;
+  let httpClient = CannonHttpJs;
 
   // production test
-  let httpClient = CannonHttp;
+  // let httpClient = CannonHttp;
 
   beforeEach(() => {
     // httpClient = new CannonHttpJs();
