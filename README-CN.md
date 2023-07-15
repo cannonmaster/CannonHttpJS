@@ -1,7 +1,9 @@
 <h1 align="center" style="border-bottom: 2px solid #ebebeb;">CannonHttpJS</h1>
 <div align="center" style="margin-bottom: 10px;">
 <img src="https://img.shields.io/badge/license-MIT-green" />
-<img src="https://img.shields.io/badge/test_coverage-98%25-cyan" />
+<a href="https://codecov.io/gh/cannonmaster/CannonHttpJS" > 
+ <img src="https://codecov.io/gh/cannonmaster/CannonHttpJS/branch/main/graph/badge.svg?token=ND97MPUCPP"/> 
+ </a>
 </div>
 
 CannonHttpJS 是一个多功能的 HTTP 客户端库，为 Node.js 和浏览器环境提供了一个简单而灵活的接口，用于发起 HTTP 请求。它提供了请求拦截器、响应拦截器、缓存、超时处理等功能。使用 CannonHttpJS，您可以轻松处理 RESTful API，并与服务器进行数据的获取和发送。
