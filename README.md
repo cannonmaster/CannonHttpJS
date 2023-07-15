@@ -1,7 +1,9 @@
 <h1 align="center" style="border-bottom: 2px solid #ebebeb;">CannonHttpJS</h1>
 <div align="center" style="margin-bottom: 10px;">
 <img src="https://img.shields.io/badge/license-MIT-green" />
-<img src="https://img.shields.io/badge/test_coverage-98%25-cyan" />
+<a href="https://codecov.io/gh/cannonmaster/CannonHttpJS" > 
+ <img src="https://codecov.io/gh/cannonmaster/CannonHttpJS/branch/main/graph/badge.svg?token=ND97MPUCPP"/> 
+ </a>
 </div>
 
 CannonHttpJS is a versatile HTTP client library that provides a simple and flexible interface for making HTTP requests in both Node.js and browser environments. It offers features such as request interceptors, response interceptors, caching, and timeout handling. With CannonHttpJS, you can easily handle RESTful APIs and communicate with servers for data retrieval and sending.
