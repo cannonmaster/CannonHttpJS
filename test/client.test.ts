@@ -19,7 +19,101 @@ describe("CannonHttpJS", () => {
     httpClient.clearResoponseInterceptor();
     httpClient.invalidateCache();
     httpClient.setCacheTime(0);
+    httpClient.invalidateLocalStorage();
     vi.spyOn(httpClient, "executeRequest" as any);
+  });
+
+  it("should load json data", async () => {
+    const localData = await httpClient.get("http://localhost:3000/json");
+    const mockResponse: ResponseData<T> = {
+      status: 200,
+      statusText: "OK",
+      headers: new Headers(),
+      data: { a: 123 },
+    };
+    expect(JSON.stringify(localData)).toEqual(JSON.stringify(mockResponse));
+  });
+
+  it("should load data failed on first time and fetch success after save to the localstorage", async () => {
+    const mockResponse: ResponseData<T> = {
+      status: 200,
+      statusText: "OK",
+      headers: new Headers(),
+      data: "hi",
+    };
+    // await httpClient.storeLocalData("http://localhost:3000/", mockResponse);
+
+    const localData = await httpClient.get("http://localhost:3000/", {
+      offline: true,
+    });
+
+    const data = await httpClient.getLocalData("http://localhost:3000/");
+
+    expect(JSON.stringify(data)).toEqual(JSON.stringify(mockResponse));
+  });
+
+  it("should load data on key in localstorage", async () => {
+    const mockResponse: ResponseData<T> = {
+      status: 200,
+      statusText: "OK",
+      headers: new Headers(),
+      data: "test data",
+    };
+    await httpClient.storeLocalData("http://localhost:3000/", mockResponse);
+
+    const localData = await httpClient.get("http://localhost:3000/", {
+      offline: true,
+    });
+
+    expect(JSON.stringify(localData)).toEqual(JSON.stringify(mockResponse));
+  });
+  it("should invalidate data on key in localstorage", async () => {
+    httpClient.setBaseUrl("http://localhost:3000");
+    const mockResponse: ResponseData<T> = {
+      status: 200,
+      statusText: "OK",
+      headers: new Headers(),
+      data: "test data",
+    };
+    await httpClient.storeLocalData("http://localhost:3000", mockResponse);
+
+    httpClient.invalidateLocalStorage("http://localhost:3000");
+
+    const localData = await httpClient.getLocalData("http://localhost:3000");
+
+    expect(localData).toEqual(null);
+  });
+
+  it("should invalidate all data in localstorage", async () => {
+    httpClient.setBaseUrl("http://localhost:3000");
+    const mockResponse: ResponseData<T> = {
+      status: 200,
+      statusText: "OK",
+      headers: new Headers(),
+      data: "test data",
+    };
+    await httpClient.storeLocalData("http://localhost:3000", mockResponse);
+
+    httpClient.invalidateLocalStorage();
+
+    const localData = await httpClient.getLocalData("http://localhost:3000");
+
+    expect(localData).toEqual(null);
+  });
+
+  it("should store data in localstorage", async () => {
+    httpClient.setBaseUrl("http://localhost:3000");
+    const mockResponse: ResponseData<T> = {
+      status: 200,
+      statusText: "OK",
+      headers: new Headers(),
+      data: "test data",
+    };
+    await httpClient.storeLocalData("http://localhost:3000", mockResponse);
+
+    const localData = await httpClient.getLocalData("http://localhost:3000");
+
+    expect(JSON.stringify(localData)).toEqual(JSON.stringify(mockResponse));
   });
 
   it("should get formdata if the isFormData is set to true", async () => {

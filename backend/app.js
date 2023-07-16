@@ -45,6 +45,9 @@ app.get("/param", (req, res) => {
 app.get("/cache", (req, res) => {
   res.status(StatusCodes.OK).send("Init connection");
 });
+app.get("/json", (req, res) => {
+  res.status(StatusCodes.OK).json({ a: 123 });
+});
 app.get("/max", (req, res) => {
   res.status(StatusCodes.BAD_REQUEST).send("testing");
 });

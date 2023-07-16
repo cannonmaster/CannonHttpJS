@@ -30,6 +30,7 @@ interface RequestOptions<T = any> {
   files?: File[] | undefined;
   isFormData?: boolean; // Flag to indicate if it's a form POST request
   timeout?: number; // Timeout duration in milliseconds
+  offline?: boolean;
 }
 
 interface ResponseData<T> {
@@ -163,6 +164,7 @@ class CannonHttpJS<T = unknown> {
       data,
       isFormData = false,
       timeout,
+      offline,
       //@ts-ignore
       ...rest
     } = config;
@@ -287,6 +289,10 @@ class CannonHttpJS<T = unknown> {
         processedResponse = await interceptor(processedResponse);
       }
 
+      if (offline && method === "GET") {
+        this.storeLocalData(requestURL.href, processedResponse);
+      }
+
       if (method === "GET" && this.cacheSize > 0) {
         const expiration = Date.now() + this.defaultCacheTime;
         this.cache.set(requestURL.href, {
@@ -323,20 +329,48 @@ class CannonHttpJS<T = unknown> {
   }
 
   private calculateRetryDelay(retryCount: number) {
-    const baseDealy = 500;
-    return baseDealy * Math.pow(2, retryCount);
+    const baseDelay = 500;
+    const maxDelay = 5000;
+    const delay = baseDelay * Math.pow(2, retryCount);
+    return Math.min(delay, maxDelay);
   }
 
   // public async request(config: RequestOptions<T>): Promise<ResponseData<T>> {
   //   return this.executeRequest(config);
   // }
 
-  public get(
+  public async storeLocalData(
+    url: string,
+    data: ResponseData<T>
+  ): Promise<void> {
+    const key = this.getLocalStorageKey(url);
+    localStorage.setItem(key, JSON.stringify(data));
+  }
+  public async getLocalData(url: string): Promise<ResponseData<T> | null> {
+    const key = this.getLocalStorageKey(url);
+    const localData = await localStorage.getItem(key);
+    if (localData) {
+      return JSON.parse(localData) as ResponseData<T>;
+    }
+    return null;
+  }
+  public async get(
     url: string,
     config: ExtendedRequestOptions<T> = {} as ExtendedRequestOptions<T>
   ): Promise<ResponseData<T>> {
-    const dataFromCache = this.cache.get(new URL(url, this.baseURL).href);
+    if (typeof window !== undefined) {
+      const { offline } = config;
+      if (offline) {
+        const localData = await this.getLocalData(
+          new URL(url, this.baseURL).href
+        );
+        console.log(localData, "local");
 
+        if (localData) return localData;
+      }
+    }
+
+    const dataFromCache = this.cache.get(new URL(url, this.baseURL).href);
     if (dataFromCache && dataFromCache.expiresAt > Date.now()) {
       dataFromCache.expiresAt = Date.now() + this.defaultCacheTime;
       return Promise.resolve(dataFromCache.data);
@@ -406,6 +440,19 @@ class CannonHttpJS<T = unknown> {
 
     // Return the sanitized data
     return sanitizedData;
+  }
+
+  private getLocalStorageKey(url: string): string {
+    return `cannon_http_${url}`;
+  }
+
+  public invalidateLocalStorage(url?: string): void {
+    if (url) {
+      const key = this.getLocalStorageKey(url);
+      localStorage.removeItem(key);
+    } else {
+      localStorage.clear();
+    }
   }
 }
 export type { ResponseData, RequestOptions, ExtendedRequestOptions };
