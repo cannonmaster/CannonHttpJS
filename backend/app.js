@@ -28,6 +28,37 @@ app.get("/auth-token", (req, res) => {
 app.get("/get-endpoint", (req, res) => {
   res.status(StatusCodes.OK).send("GET response");
 });
+app.get("/streaming", (req, res) => {
+  // Send response as a stream of data
+  const data = "ABCDEFGHIJKLMNOPQRSTUVWXYZ666666";
+  const chunkSize = 16;
+  const interval = 500; // 500ms delay between each chunk
+
+  // Set response headers
+  res.setHeader("Content-Type", "text/plain");
+  res.setHeader("Content-Length", data.length);
+
+  // Send chunks of data at regular intervals
+  let currentIndex = 0;
+  const sendChunk = () => {
+    const chunk = data.slice(currentIndex, currentIndex + chunkSize);
+    currentIndex += chunkSize;
+    console.log(currentIndex, data.length);
+
+    // If there's still data to send
+    if (currentIndex <= data.length) {
+      res.write(chunk);
+      setTimeout(sendChunk, interval);
+    } else {
+      console.log("end");
+      // End the response when all data has been sent
+      return res.end();
+    }
+  };
+
+  // Start sending data
+  sendChunk();
+});
 app.get("/", (req, res) => {
   // console.log("abc");
   res.status(StatusCodes.OK).send("hi");
