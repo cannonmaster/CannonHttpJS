@@ -21,6 +21,8 @@ describe("CannonHttpJS", () => {
     httpClient.setCacheTime(0);
     httpClient.invalidateLocalStorage();
     vi.spyOn(httpClient, "executeRequest" as any);
+    vi.spyOn(httpClient, "storeLocalData" as any);
+    vi.spyOn(httpClient, "getLocalData" as any);
   });
 
   it("should load json data", async () => {
@@ -59,7 +61,7 @@ describe("CannonHttpJS", () => {
       headers: new Headers(),
       data: "test data",
     };
-    await httpClient.storeLocalData("http://localhost:3000/", mockResponse);
+    await httpClient["storeLocalData"]("http://localhost:3000/", mockResponse);
 
     const localData = await httpClient.get("http://localhost:3000/", {
       offline: true,
@@ -75,7 +77,7 @@ describe("CannonHttpJS", () => {
       headers: new Headers(),
       data: "test data",
     };
-    await httpClient.storeLocalData("http://localhost:3000", mockResponse);
+    await httpClient["storeLocalData"]("http://localhost:3000", mockResponse);
 
     httpClient.invalidateLocalStorage("http://localhost:3000");
 
@@ -92,7 +94,7 @@ describe("CannonHttpJS", () => {
       headers: new Headers(),
       data: "test data",
     };
-    await httpClient.storeLocalData("http://localhost:3000", mockResponse);
+    await httpClient["storeLocalData"]("http://localhost:3000", mockResponse);
 
     httpClient.invalidateLocalStorage();
 
@@ -489,6 +491,31 @@ describe("CannonHttpJS", () => {
       // Ensure the 'executeRequest' method was called the expected number of times
       expect(httpClient["executeRequest"]).toHaveBeenCalledTimes(maxRetry + 1);
     }
+  });
+
+  it("should stream data from the backend", async () => {
+    const responseData = "ABCDEFGHIJKLMNOPQRSTUVWXYZ666666";
+    const url = "http://localhost:3000/streaming";
+
+    // Initialize a variable to collect streamed data
+    let streamedData = "";
+    const textDecoder = new TextDecoder();
+
+    // Function to be called on each chunk of data received during streaming
+    const onDataChunk = ({ value }) => {
+      streamedData += textDecoder.decode(value);
+    };
+
+    // Make the streaming request using the stream method of CannonHttpJS
+    await httpClient.stream(url, {}, onDataChunk);
+
+    // Check if the streamed data matches the expected data
+    expect(streamedData).toBe(responseData);
+
+    // Assertions on other properties of the response if needed
+    // expect(response.status).toBe(200);
+    // expect(response.statusText).toBe("OK");
+    // ...
   });
 
   it("should get the right cache key after renmove the oldest cache key", async () => {

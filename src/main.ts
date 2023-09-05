@@ -1,16 +1,3 @@
-// let fetchImplementation: any;
-
-// if (typeof window === "undefined") {
-//   // mod.cjs
-//   fetchImplementation = (...args: unknown[]): Promise<any> =>
-//     import("node-fetch").then(({ default: fetch }) =>
-//       fetch(...(args as Parameters<typeof fetch>))
-//     );
-// } else {
-//   // Running in the browser
-//   fetchImplementation = window.fetch.bind(window);
-// }
-
 const fetchImplementation = fetch;
 
 type ResponseSanitizer<T> = (data: T) => T;
@@ -31,6 +18,7 @@ interface RequestOptions<T = any> {
   isFormData?: boolean; // Flag to indicate if it's a form POST request
   timeout?: number; // Timeout duration in milliseconds
   offline?: boolean;
+  onDataChunk?: (chunk: any) => void;
 }
 
 interface ResponseData<T> {
@@ -165,6 +153,7 @@ class CannonHttpJS<T = unknown> {
       isFormData = false,
       timeout,
       offline,
+      onDataChunk,
       //@ts-ignore
       ...rest
     } = config;
@@ -265,14 +254,46 @@ class CannonHttpJS<T = unknown> {
       if (!response.ok) {
         throw new Error(`Request failed with status ${response.status}`);
       }
-
       let responseData: T;
-      const contentType = response.headers.get("content-type");
 
-      if (contentType && contentType.includes("application/json")) {
-        responseData = await response.json();
+      if (response.body instanceof ReadableStream && onDataChunk) {
+        console.log(123123);
+        // Create a reader for the streaming body
+        const reader = response.body.getReader();
+        const streamedData: any[] = [];
+        // Define a function to process chunks of data as they arrive
+        const processData = async (
+          reader: ReadableStreamDefaultReader<any>,
+          onDataChunk?: (chunk: any) => void
+        ) => {
+          while (true) {
+            const trunk = await reader.read();
+            const { done } = trunk;
+            // Process the chunk of data (result.value) here if needed
+
+            if (done) {
+              break;
+            }
+            // streamedData.push(textDecoder.decode(value));
+
+            if (onDataChunk) {
+              streamedData.push(onDataChunk(trunk));
+            }
+          }
+        };
+
+        // Start processing the data from the streaming response
+        await processData(reader, onDataChunk);
+        responseData = streamedData as any as T;
+        // responseData = streamedData.join("") as any as T;
       } else {
-        responseData = (await response.text()) as any as T;
+        const contentType = response.headers.get("content-type");
+
+        if (contentType && contentType.includes("application/json")) {
+          responseData = await response.json();
+        } else {
+          responseData = (await response.text()) as any as T;
+        }
       }
 
       const sanitizedData = this.sanitizeResponseData(responseData);
@@ -339,14 +360,14 @@ class CannonHttpJS<T = unknown> {
   //   return this.executeRequest(config);
   // }
 
-  public async storeLocalData(
+  private async storeLocalData(
     url: string,
     data: ResponseData<T>
   ): Promise<void> {
     const key = this.getLocalStorageKey(url);
     localStorage.setItem(key, JSON.stringify(data));
   }
-  public async getLocalData(url: string): Promise<ResponseData<T> | null> {
+  private async getLocalData(url: string): Promise<ResponseData<T> | null> {
     const key = this.getLocalStorageKey(url);
     const localData = await localStorage.getItem(key);
     if (localData) {
@@ -354,6 +375,37 @@ class CannonHttpJS<T = unknown> {
     }
     return null;
   }
+
+  public async stream(
+    url: string,
+    config: ExtendedRequestOptions<T> = {} as ExtendedRequestOptions<T>,
+    onDataChunk: (chunk: any) => void
+  ): Promise<ResponseData<T>> {
+    if (typeof window !== "undefined") {
+      const { offline } = config;
+      if (offline) {
+        const localData = await this.getLocalData(
+          new URL(url, this.baseURL).href
+        );
+
+        if (localData) {
+          return localData;
+        }
+      }
+    }
+
+    const dataFromCache = this.cache.get(new URL(url, this.baseURL).href);
+    if (dataFromCache && dataFromCache.expiresAt > Date.now()) {
+      dataFromCache.expiresAt = Date.now() + this.defaultCacheTime;
+      return Promise.resolve(dataFromCache.data);
+    }
+
+    return this.executeRequest(
+      { ...config, url, method: "GET", onDataChunk },
+      0
+    );
+  }
+
   public async get(
     url: string,
     config: ExtendedRequestOptions<T> = {} as ExtendedRequestOptions<T>
@@ -364,7 +416,6 @@ class CannonHttpJS<T = unknown> {
         const localData = await this.getLocalData(
           new URL(url, this.baseURL).href
         );
-        console.log(localData, "local");
 
         if (localData) return localData;
       }

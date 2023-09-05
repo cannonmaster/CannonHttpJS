@@ -1,7 +1,7 @@
 {
   "name": "@cannonui/httpjs",
   "private": false,
-  "version": "1.3.1",
+  "version": "1.6.3",
   "type": "module",
   "files": [
     "cannonHttpJS"
@@ -11,8 +11,14 @@
   "module": "./cannonHttpJS/cannon-httpjs.js",
   "exports": {
     ".": {
-      "import": "./cannonHttpJS/cannon-httpjs.js",
-      "require": "./cannonHttpJS/cannon-httpjs.umd.cjs"
+      "import":{
+        "types": "./cannonHttpJS/main.d.ts",
+        "default": "./cannonHttpJS/cannon-httpjs.js"
+      } ,
+      "require": {
+        "types": "./cannonHttpJS/main.d.ts",
+        "default": "./cannonHttpJS/cannon-httpjs.umd.cjs"
+      }
     }
   },
   "scripts": {

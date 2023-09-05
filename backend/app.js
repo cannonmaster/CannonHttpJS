@@ -22,8 +22,58 @@ app.use(
 // });
 // app.use(morgan("dev"));
 app.use(cors());
+app.use(express.static("images"));
+app.get("/", (req, res) => {
+  console.log("321");
+  res.status(StatusCodes.OK).send("OK");
+});
 app.get("/auth-token", (req, res) => {
   res.status(StatusCodes.OK).send("auth token detected");
+});
+// Sample data
+const searchData = [
+  { id: 1, name: "Item 1" },
+  { id: 2, name: "Item 2" },
+  { id: 3, name: "Item 3" },
+  // Add more data here as needed
+];
+
+// Endpoint for fetching JSON data
+app.get("/search", (req, res) => {
+  const { q } = req.query;
+  // Simulate API delay
+  setTimeout(() => {
+    if (!q) {
+      console.log(123);
+      // If query is empty, return all data
+      res.json(searchData);
+    } else {
+      // If query is provided, filter data based on the query
+      const filteredData = searchData.filter((item) =>
+        item.name.toLowerCase().includes(q.toLowerCase())
+      );
+      res.json(filteredData);
+    }
+  }, 1000); // Simulate a 1-second delay for demonstration purposes
+});
+app.get("/sse", (req, res) => {
+  console.log(123);
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache");
+  res.setHeader("Connection", "keep-alive");
+  let counter = 0;
+  const interverId = setInterval(() => {
+    counter++;
+    res.write(`data: ${counter}\n\n`);
+    if (counter === 10) {
+      clearInterval(interverId);
+      res.end();
+    }
+  }, 2000);
+});
+app.get("/cacheapi", (req, res) => {
+  console.log(123);
+  res.json({ hi: 123 });
 });
 app.get("/get-endpoint", (req, res) => {
   res.status(StatusCodes.OK).send("GET response");
@@ -105,6 +155,7 @@ app.delete("/endpoint", (req, res) => {
 });
 
 app.post("/endpoint", (req, res) => {
+  console.log(req.body);
   res.status(StatusCodes.OK).send("post response");
 });
 
@@ -125,6 +176,6 @@ app.post("/file", upload.single("file"), (req, res) => {
   res.status(StatusCodes.OK).send("abc");
 });
 
-app.listen(3000, () => {
-  console.log("server running on port 3000");
+app.listen(3001, () => {
+  console.log("server running on port 3001");
 });
